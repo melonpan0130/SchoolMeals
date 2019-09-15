@@ -1,3 +1,5 @@
+<%@page import="java.time.LocalTime"%>
+<%@page import="java.time.LocalDate"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.sql.*"%>
@@ -11,14 +13,6 @@
 <title>Insert title here</title>
 </head>
 <body>
-<h2>오늘의 급식</h2>
-<table border="1">
-	<tr>
-		<td>date</td>
-		<td>meal</td>
-		<td>foods</td>
-		<td>allergy</td>
-	</tr>
 <%
 	request.setCharacterEncoding("utf-8");
 
@@ -31,11 +25,35 @@
 		DataSource ds = (DataSource)envctx.lookup("jdbc/basicjsp");
 		conn = ds.getConnection();
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		String todayStr = sdf.format(new Date());
+		LocalDate ld = LocalDate.now();
+		LocalTime lt = LocalTime.now();
+		String title = "내일의 아침밥은";
+		String meals = "B";
 		
-		String sql = "SELECT * FROM meals WHERE date = '"+todayStr+"'";
+		if(lt.isBefore(LocalTime.of(7, 0))) title = "오늘의 아침밥은";
+		else if(lt.isBefore(LocalTime.of(12, 10))){
+			title = "오늘의 점심밥은";
+			meals = "L";
+		}
+		else if(lt.isBefore(LocalTime.of(17, 20))){
+			title = "오늘의 저녁밥은";
+			meals = "D";
+		}
+		else ld = ld.plusDays(1);
 		
+		String sql = "SELECT * FROM meals WHERE date = '"+ld+"' AND meal = '"+meals+"'";
+%>
+<h2><%= title %></h2>
+time : <%= lt.getHour() %>
+<%= ld %>
+<table border="1">
+	<tr>
+		<td>date</td>
+		<td>meal</td>
+		<td>foods</td>
+		<td>allergy</td>
+	</tr>
+<%		
 		pstmt = conn.prepareStatement(sql);
 		rs = pstmt.executeQuery();
 		
@@ -52,7 +70,7 @@
 				<td><%= allergy %></td>
 			</tr>	
 			
-	<%	} // while
+<%		} // while
 		} // try
 		catch(Exception e) {
 			e.printStackTrace();
