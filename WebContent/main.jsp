@@ -13,39 +13,60 @@
 <title>Insert title here</title>
 </head>
 <body>
+<a href="main.jsp"><h1>미림급식알리미</h1></a>
+<form action="">
+	<input type="date" name="searchDate" placeholder="YYYYMMDD">
+	<input type="submit" value="Submit">
+</form>
 <%
 	request.setCharacterEncoding("utf-8");
+	
+	String SearchDate = null;
+	SearchDate = request.getParameter("searchDate");
 
 	Connection conn = null;
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
+	
 	try {
 		Context initctx = new InitialContext();
 		Context envctx = (Context)initctx.lookup("java:comp/env");
 		DataSource ds = (DataSource)envctx.lookup("jdbc/basicjsp");
 		conn = ds.getConnection();
 		
-		LocalDate ld = LocalDate.now();
-		LocalTime lt = LocalTime.now();
-		String title = "내일의 아침밥은";
-		String meals = "B";
+		String sql = "";
+		if(SearchDate != null && SearchDate != "") {
+			sql = "SELECT * FROM meals WHERE date = '"+SearchDate+"'";
+%>
+search date : <%= SearchDate %>
+<%		}
+		else {
+			LocalDate ld = LocalDate.now();
+			LocalTime lt = LocalTime.now();
+			String title = "내일의 아침밥은";
+			String meals = "B";
+			
+			if(lt.isBefore(LocalTime.of(7, 0))) title = "오늘의 아침밥은";
+			else if(lt.isBefore(LocalTime.of(12, 10))){
+				title = "오늘의 점심밥은";
+				meals = "L";
+			}
+			else if(lt.isBefore(LocalTime.of(17, 20))){
+				title = "오늘의 저녁밥은";
+				meals = "D";
+			}
+			else ld = ld.plusDays(1);
+			
+			sql = "SELECT * FROM meals WHERE date = '"+ld+"' AND meal = '"+meals+"'";
 		
-		if(lt.isBefore(LocalTime.of(7, 0))) title = "오늘의 아침밥은";
-		else if(lt.isBefore(LocalTime.of(12, 10))){
-			title = "오늘의 점심밥은";
-			meals = "L";
-		}
-		else if(lt.isBefore(LocalTime.of(17, 20))){
-			title = "오늘의 저녁밥은";
-			meals = "D";
-		}
-		else ld = ld.plusDays(1);
-		
-		String sql = "SELECT * FROM meals WHERE date = '"+ld+"' AND meal = '"+meals+"'";
 %>
 <h2><%= title %></h2>
 time : <%= lt.getHour() %>
 <%= ld %>
+
+<%		
+		}
+%>
 <table border="1">
 	<tr>
 		<td>date</td>
@@ -53,8 +74,7 @@ time : <%= lt.getHour() %>
 		<td>foods</td>
 		<td>allergy</td>
 	</tr>
-<%		
-		pstmt = conn.prepareStatement(sql);
+<%		pstmt = conn.prepareStatement(sql);
 		rs = pstmt.executeQuery();
 		
 		while(rs.next()) {
