@@ -1,3 +1,4 @@
+<%@page import="java.util.Date"%>
 <%@page import="java.sql.*"%>
 <%@page import="javax.sql.*, javax.naming.*"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -9,13 +10,13 @@
 <title>Insert title here</title>
 </head>
 <body>
-<h2>Member 테이블의 레코드 표시</h2>
+<h2>오늘의 급식</h2>
 <table border="1">
 	<tr>
-		<td width="100">ID</td>
-		<td width="100">PW</td>
-		<td width="100">Name</td>
-		<td width="250">Register Date</td>
+		<td>date</td>
+		<td>meal</td>
+		<td>foods</td>
+		<td>allergy</td>
 	</tr>
 <%
 	request.setCharacterEncoding("utf-8");
@@ -29,21 +30,22 @@
 		DataSource ds = (DataSource)envctx.lookup("jdbc/basicjsp");
 		conn = ds.getConnection();
 		
-		String sql = "SELECT * FROM member";
+		String sql = "SELECT * FROM meals";
 		
 		pstmt = conn.prepareStatement(sql);
 		rs = pstmt.executeQuery();
 		
 		while(rs.next()) {
-			String id = rs.getString("id");
-			String passwd = rs.getString("passwd");
-			String name = rs.getString("name");
-			Timestamp register = rs.getTimestamp("reg_date");%>
+			Date date = rs.getDate("date"); 
+			String meal = rs.getString("meal");
+			String foods = rs.getString("foods");
+			String allergy = rs.getString("allergy");
+%>
 			<tr>
-				<td><%= id %></td>
-				<td><%= passwd %></td>
-				<td><%= name %></td>
-				<td><%= register %></td>
+				<td><%= date %></td>
+				<td><%= meal %></td>
+				<td><%= foods %></td>
+				<td><%= allergy %></td>
 			</tr>	
 			
 	<%	} // while
