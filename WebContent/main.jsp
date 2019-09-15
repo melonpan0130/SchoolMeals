@@ -1,4 +1,5 @@
 <%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.sql.*"%>
 <%@page import="javax.sql.*, javax.naming.*"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -30,7 +31,10 @@
 		DataSource ds = (DataSource)envctx.lookup("jdbc/basicjsp");
 		conn = ds.getConnection();
 		
-		String sql = "SELECT * FROM meals";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String todayStr = sdf.format(new Date());
+		
+		String sql = "SELECT * FROM meals WHERE date = '"+todayStr+"'";
 		
 		pstmt = conn.prepareStatement(sql);
 		rs = pstmt.executeQuery();
