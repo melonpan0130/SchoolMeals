@@ -35,6 +35,12 @@
 	<input type="checkbox" value="17" name="allergy"><label>오징어</label>
 	<input type="checkbox" value="18" name="allergy"><label>조개류(굴, 조개)</label>
 	<br>
+	<select name="meal">
+		<option value="A">전체</option>
+		<option value="B">아침</option>
+		<option value="L">점심</option>
+		<option value="D">저녁</option>
+	</select>
 	<input type="submit" value="Submit">
 </form>
 <%
@@ -43,6 +49,7 @@
 	String SearchDate = request.getParameter("searchDate");
 	String[] SearchAllergy = request.getParameterValues("allergy");
 	String allergys = "";
+	String SearchMeal = request.getParameter("meal");
 	
 	Connection conn = null;
 	PreparedStatement pstmt = null;
@@ -55,6 +62,7 @@
 		conn = ds.getConnection();
 		
 		String sql = "";
+		
 		if(SearchDate != null && SearchDate != "") {
 			allergys += "AND (";
 			for(String a : SearchAllergy) {
@@ -90,6 +98,15 @@ time : <%= lt.getHour() %>
 
 <%		
 		}
+		
+		if(SearchMeal != null) {
+			if( !SearchMeal.equals("A")){
+				sql += "AND meal = '"+SearchMeal+"'";
+			%>
+				<%= SearchMeal %>
+				
+			<%}
+		}
 %>
 <table border="1">
 	<tr>
@@ -105,7 +122,10 @@ time : <%= lt.getHour() %>
 			Date date = rs.getDate("date"); 
 			String meal = rs.getString("meal");
 			String foods = rs.getString("foods");
-			String allergy = rs.getString("allergy");
+			
+			String allergy = "";
+			if(rs.getString("allergy") != null)
+				allergy = rs.getString("allergy");
 			
 			String style = "";
 			if(rs.getString("notify") != null)
