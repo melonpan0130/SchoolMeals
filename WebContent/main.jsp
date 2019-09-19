@@ -64,11 +64,17 @@
 		String sql = "";
 		
 		if(SearchDate != null && SearchDate != "") {
-			allergys += "AND (";
-			for(String a : SearchAllergy) {
-				allergys += "allergy LIKE '% "+a+" %' OR ";
+			if(SearchAllergy != null) {
+				allergys += "AND (";
+				for(String a : SearchAllergy) {
+					allergys += "allergy LIKE '% "+a+" %' OR ";
+				}
+				allergys += "false )";	
 			}
-			allergys += "false )";
+			else {
+				allergys += "AND false";
+			}
+			
 			sql = "SELECT date, meal, foods, allergy,"+
 					"(SELECT allergy from meals s where s.date=m.date AND s.meal=m.meal AND s.foods=m.foods "+allergys+") AS notify"
 					+" FROM meals m WHERE date = '"+SearchDate+"'";
@@ -101,7 +107,7 @@ time : <%= lt.getHour() %>
 		
 		if(SearchMeal != null) {
 			if( !SearchMeal.equals("A")){
-				sql += "AND meal = '"+SearchMeal+"'";
+				sql += " AND meal = '"+SearchMeal+"'";
 			%>
 				<%= SearchMeal %>
 				
